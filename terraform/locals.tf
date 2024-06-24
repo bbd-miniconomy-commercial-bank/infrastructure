@@ -1,4 +1,5 @@
 locals {
-  accountId = "625366111301"
-  domain    = "noinfluence.projects.bbdgrad.com"  
+  accountId = "978251882572"
+  domain    = "commercialbank.projects.bbdgrad.com"
+  services = []
 }

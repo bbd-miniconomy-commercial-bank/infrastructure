@@ -13,7 +13,7 @@ module "vpc" {
   create_database_subnet_group           = true
   create_database_subnet_route_table     = true
   create_database_internet_gateway_route = true
-  database_subnet_group_name             = "noinfluence-db-subnet"
+  database_subnet_group_name             = "commercial-bank-service-db-subnet"
 
   enable_dns_hostnames = true
   enable_dns_support   = true

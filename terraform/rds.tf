@@ -11,9 +11,9 @@ resource "aws_security_group" "rds" {
 
 module "rds" {
   source                      = "terraform-aws-modules/rds/aws"
-  identifier                  = "noinfluence"
+  identifier                  = "commercial-bank-service"
   family                      = "postgres16"
-  db_name                     = "noinfluenceprod"
+  db_name                     = "prod"
   engine                      = "postgres"
   instance_class              = "db.t3.micro"
   create_db_instance          = true

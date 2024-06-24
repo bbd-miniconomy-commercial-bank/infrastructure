@@ -1,15 +1,10 @@
-resource "aws_s3_bucket" "beanstalk_file_bucket" {
-  bucket        = "noinfluence-deployments"
-  force_destroy = true
-}
-
-resource "aws_s3_bucket" "page_storage" {
-  bucket        = "noinfluence-page-files"
+resource "aws_s3_bucket" "beanstalk_deployment_bucket" {
+  bucket        = "commercial-bank-service-deployments"
   force_destroy = true
 }
 
 resource "aws_s3_bucket" "frontend" {
-  bucket        = "noinfluence-frontend"
+  bucket        = "admin-portal-frontend"
   force_destroy = true
 }
 

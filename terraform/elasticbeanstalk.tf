@@ -1,26 +1,41 @@
-resource "aws_acm_certificate" "https_api_cert" {
-  domain_name = "api-${local.domain}"
-  validation_method = "DNS"
-}
-
-data "aws_secretsmanager_secret_version" "noinfleunce-prod-details" {
+data "aws_secretsmanager_secret_version" "commercial_bank_service_db_details" {
   secret_id = module.rds.db_instance_master_user_secret_arn
 }
 
-resource "aws_iam_policy" "bucket_access_policy" {
-  name = "noinfluence-file-storage-policy"
+resource "aws_iam_policy" "elasticbeanstalk_sm_access_policy" {
+  name = "commercial-bank-service-sm-read-only-policy"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Action   = "s3:*"
-        Effect   = "Allow"
+        Effect   = "Allow",
+        Action   = "secretsmanager:GetSecretValue",
         Resource = [
-          aws_s3_bucket.page_storage.arn,
-          "${aws_s3_bucket.page_storage.arn}/*"
+          "arn:aws:secretsmanager:eu-west-1:978251882572:secret:commercial-bank-service/*/*"
         ]
-      },
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "elasticbeanstalk_ssm_access_policy" {
+  name = "commercial-bank-service-ssm-read-only-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
+        ],
+        Resource = [
+          "arn:aws:ssm:eu-west-1:978251882572:parameter/commercial-bank-service/*"
+        ]
+      }
     ]
   })
 }
@@ -43,7 +58,8 @@ resource "aws_iam_role" "beanstalk_ec2" {
   description           = "Allows EC2 instances to call AWS services on your behalf."
   force_detach_policies = false
   managed_policy_arns   = [
-    aws_iam_policy.bucket_access_policy.arn,
+    aws_iam_policy.elasticbeanstalk_sm_access_policy.arn,
+    aws_iam_policy.elasticbeanstalk_ssm_access_policy.arn,
     "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker", 
     "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier", 
     "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
@@ -59,14 +75,14 @@ resource "aws_iam_instance_profile" "beanstalk_ec2" {
 }
 
 resource "aws_elastic_beanstalk_application" "beanstalk_app" {
-  name        = "noinfluence-api"
-  description = "noinfluence Api"
+  name        = "commercial-bank-service"
+  description = "Commercial Bank Service"
 }
 
 resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
-  name                = "noinfluence-api-env"
+  name                = "commercial-bank-service-env"
   application         = aws_elastic_beanstalk_application.beanstalk_app.name
-  solution_stack_name = "64bit Amazon Linux 2023 v6.1.5 running Node.js 20"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.2.5 running Corretto 21"
   tier                = "WebServer"
 
   setting {
@@ -195,70 +211,19 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     value     = 1
     resource  = ""
   }
-  setting {
+   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APP_ENVIRONMENT"
-    value     = "PROD"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_USER"
+    name      = "SPRING_DATASOURCE_USERNAME"
     value     = module.rds.db_instance_username
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_PWD"
-    value     = jsondecode(data.aws_secretsmanager_secret_version.noinfleunce-prod-details.secret_string)["password"]
+    name      = "SPRING_DATASOURCE_PASSWORD"
+    value     = jsondecode(data.aws_secretsmanager_secret_version.commercial_bank_service_db_details.secret_string)["password"]
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_HOST"
-    value     = module.rds.db_instance_address
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_PORT"
-    value     = module.rds.db_instance_port
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_NAME"
-    value     = module.rds.db_instance_name
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_USERPOOL_ID"
-    value     = aws_cognito_user_pool_client.app_user_pool_client.user_pool_id
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_CLIENT_ID"
-    value     = aws_cognito_user_pool_client.app_user_pool_client.id
-  }
-  
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_CLIENT_SECRET"
-    value     = aws_cognito_user_pool_client.app_user_pool_client.client_secret
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "PAGE_BUCKET"
-    value     = aws_s3_bucket.page_storage.bucket
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_DOMAIN"
-    value     = "https://${aws_cognito_user_pool_domain.app_user_pool_domain.domain}.auth.eu-west-1.amazoncognito.com"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_REDIRECT"
-    value     = aws_cognito_user_pool_client.app_user_pool_client.default_redirect_uri
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "FRONT_END_URL"
-    value     = "https://${local.domain}"
+    name      = "SPRING_DATASOURCE_URL"
+    value     = "jdbc:postgresql://${module.rds.db_instance_address}:5432/${module.rds.db_instance_name}"
   }
 }

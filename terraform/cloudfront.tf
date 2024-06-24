@@ -1,9 +1,3 @@
-resource "aws_acm_certificate" "https_frontend_cert" {
-  domain_name = local.domain
-  validation_method = "DNS"
-  provider = aws.global
-}
-
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "Frontend"
   description                       = "Allow cloudfront access to frontend bucket"
@@ -32,9 +26,9 @@ resource "aws_cloudfront_distribution" "frontend" {
     target_origin_id = "S3-${aws_s3_bucket.frontend.id}"
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    # min_ttl                = 0
+    # default_ttl            = 3600
+    # max_ttl                = 86400
   }
 
   price_class = "PriceClass_200"

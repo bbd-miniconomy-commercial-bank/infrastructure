@@ -60,7 +60,7 @@ locals {
               "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
             },
             "StringLike" : {
-              "token.actions.githubusercontent.com:sub" : "repo:bbd-miniconomy-commercial-bank/infrastructure:*"
+              "token.actions.githubusercontent.com:sub" : "repo:bbd-miniconomy-commercial-bank/*:*"
             }
           }
         }
