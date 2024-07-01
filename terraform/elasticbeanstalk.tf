@@ -40,6 +40,27 @@ resource "aws_iam_policy" "elasticbeanstalk_ssm_access_policy" {
   })
 }
 
+resource "aws_iam_policy" "elasticbeanstalk_s3_access_policy" {
+  name = "commercial-bank-service-s3-read-only-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::miniconomy-trust-store-bucket/*",
+          "arn:aws:s3:::miniconomy-trust-store-bucket"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role" "beanstalk_ec2" {
   assume_role_policy    = jsonencode(
     {
