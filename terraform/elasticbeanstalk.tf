@@ -211,7 +211,7 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     value     = 1
     resource  = ""
   }
-   setting {
+  setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SPRING_DATASOURCE_USERNAME"
     value     = module.rds.db_instance_username
@@ -225,6 +225,21 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SPRING_DATASOURCE_URL"
     value     = "jdbc:postgresql://${module.rds.db_instance_address}:5432/${module.rds.db_instance_name}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "AWS_REGION"
+    value     = data.aws_region.current.name
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "AWS_S3_CERTSTORE_BUCKET_NAME"
+    value     = local.certstore_bucket
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "AWS_S3_CERTSTORE_BUCKET_FILENAME"
+    value     = local.certstore_file
   }
 }
 
