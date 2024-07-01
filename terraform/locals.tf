@@ -3,4 +3,5 @@ locals {
   domain           = "commercialbank.projects.bbdgrad.com"
   certstore_bucket = "miniconomy-trust-store-bucket"
   certstore_file   = "truststore.pem"
+  aws_region       = "eu-west-1"
 }

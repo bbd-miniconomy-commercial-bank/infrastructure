@@ -250,7 +250,7 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "AWS_REGION"
-    value     = data.aws_region.current.name
+    value     = local.aws_region
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
