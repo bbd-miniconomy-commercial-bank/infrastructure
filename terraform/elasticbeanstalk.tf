@@ -2,6 +2,10 @@ data "aws_secretsmanager_secret_version" "commercial_bank_service_db_details" {
   secret_id = module.rds.db_instance_master_user_secret_arn
 }
 
+data "aws_secretsmanager_secret_version" "commercial_bank_service_retail_bank" {
+  secret_id = aws_secretsmanager_secret.retail_bank_secrets.arn
+}
+
 resource "aws_iam_policy" "elasticbeanstalk_sm_access_policy" {
   name = "commercial-bank-service-sm-read-only-policy"
 
@@ -12,7 +16,8 @@ resource "aws_iam_policy" "elasticbeanstalk_sm_access_policy" {
         Effect   = "Allow",
         Action   = "secretsmanager:GetSecretValue",
         Resource = [
-          "arn:aws:secretsmanager:eu-west-1:978251882572:secret:commercial-bank-service/*/*"
+          "arn:aws:secretsmanager:eu-west-1:978251882572:secret:commercial-bank-service/*/*",
+          "arn:aws:secretsmanager:eu-west-1:978251882572:secret:*/*/commercial-bank-service"
         ]
       }
     ]
@@ -33,7 +38,7 @@ resource "aws_iam_policy" "elasticbeanstalk_ssm_access_policy" {
           "ssm:GetParametersByPath"
         ],
         Resource = [
-          "arn:aws:ssm:eu-west-1:978251882572:parameter/commercial-bank-service/*"
+          "arn:aws:ssm:eu-west-1:978251882572:parameter/commercial-bank-service/prod/*"
         ]
       }
     ]
@@ -261,6 +266,11 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "AWS_S3_CERTSTORE_BUCKET_FILENAME"
     value     = local.certstore_file
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "EXTERNALBANK_RETAILBANK_ENDPOINT"
+    value     = jsondecode(data.aws_secretsmanager_secret_version.commercial_bank_service_retail_bank.secret_string)["url"]
   }
 }
 
