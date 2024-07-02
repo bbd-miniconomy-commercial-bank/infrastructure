@@ -25,7 +25,7 @@ resource "aws_cognito_user_pool" "app_user_pool" {
     invite_message_template {
         email_subject = "Commercial Bank Service Email Invitation"
         email_message = "You have been invited to use Commercial Bank Service admin portal.\n\nPlease find your login credentials below.\n\nUsername: {username}\nTemp Password: {####}"
-        sms_message = "You have been invited to use Commercial Bank Service admin portal. Please find your login credentials below.\n\nUsername: {username}\nTemp Password: {####}"
+        sms_message = "Please find your Commercial Bank Service admin portal login credentials below.\n\nUsername: {username}\nTemp Password: {####}"
     }
   }
   
