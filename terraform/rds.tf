@@ -10,20 +10,21 @@ resource "aws_security_group" "rds" {
 }
 
 module "rds" {
-  source                      = "terraform-aws-modules/rds/aws"
-  identifier                  = "commercial-bank-service"
-  family                      = "postgres16"
-  db_name                     = "prod"
-  engine                      = "postgres"
-  instance_class              = "db.t3.micro"
-  create_db_instance          = true
-  allocated_storage           = 20
-  deletion_protection         = false
-  skip_final_snapshot         = true
-  db_subnet_group_name        = module.vpc.database_subnet_group_name
-  vpc_security_group_ids      = [aws_security_group.rds.id]
-  publicly_accessible         = true
-  username                    = "adminuser"
-  port                        = 5432
-  manage_master_user_password = true
+  source                 = "terraform-aws-modules/rds/aws"
+  identifier             = "commercial-bank-service"
+  family                 = "postgres16"
+  db_name                = "prod"
+  engine                 = "postgres"
+  instance_class         = "db.t3.micro"
+  create_db_instance     = true
+  allocated_storage      = 20
+  deletion_protection    = false
+  skip_final_snapshot    = true
+  db_subnet_group_name   = module.vpc.database_subnet_group_name
+  vpc_security_group_ids = [aws_security_group.rds.id]
+  publicly_accessible    = true
+  username               = "adminuser"
+  port                   = 5432
+  manage_master_user_password          = true
+  manage_master_user_password_rotation = false
 }
