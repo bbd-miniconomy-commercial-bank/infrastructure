@@ -6,6 +6,10 @@ data "aws_secretsmanager_secret_version" "commercial_bank_service_retail_bank" {
   secret_id = aws_secretsmanager_secret.retail_bank_secrets.arn
 }
 
+data "aws_secretsmanager_secret_version" "commercial_bank_service_zues" {
+  secret_id = aws_secretsmanager_secret.zues_secrets.arn
+}
+
 resource "aws_iam_policy" "elasticbeanstalk_sm_access_policy" {
   name = "commercial-bank-service-sm-read-only-policy"
 
@@ -208,6 +212,12 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     resource  = ""
   }
   setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
+    value     = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    resource  = ""
+  }
+  setting {
     namespace = "aws:ec2:vpc"
     name      = "AssociatePublicIpAddress"
     value     = "true"
@@ -271,6 +281,11 @@ resource "aws_elastic_beanstalk_environment" "beanstalk_env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "EXTERNALBANK_RETAILBANK_ENDPOINT"
     value     = jsondecode(data.aws_secretsmanager_secret_version.commercial_bank_service_retail_bank.secret_string)["url"]
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ZUES_ENDPOINT"
+    value     = jsondecode(data.aws_secretsmanager_secret_version.commercial_bank_service_zues.secret_string)["url"]
   }
 }
 
